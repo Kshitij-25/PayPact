@@ -1,8 +1,6 @@
-import '../entities/user_entity.dart';
+import '../../data/model/user_model.dart';
 
 abstract class AuthRepository {
-  Stream<UserEntity> get authStateChanges;
-  UserEntity get currentUser;
-  Future<UserEntity> signInWithGoogle();
+  Future<UserModel> signInWithGoogle();
   Future<void> signOut();
 }

@@ -25,6 +25,7 @@ class CustomAvatarWidget extends StatelessWidget {
       width: width,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
+        color: isDarkMode ? Theme.of(context).cardColor : const Color(0xFFE7EBF0),
         image: DecorationImage(
           image: CachedNetworkImageProvider(
             photoURL ?? '',
@@ -32,7 +33,8 @@ class CustomAvatarWidget extends StatelessWidget {
             maxHeight: 100,
             maxWidth: 100,
           ),
-          fit: BoxFit.cover,
+          fit: BoxFit.fitHeight,
+          filterQuality: FilterQuality.high,
         ),
         boxShadow: [
           BoxShadow(

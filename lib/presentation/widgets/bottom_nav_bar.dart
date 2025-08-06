@@ -2,6 +2,8 @@ import 'package:flutter/cupertino.dart' hide BoxDecoration, BoxShadow;
 import 'package:flutter/material.dart' hide BoxDecoration, BoxShadow;
 import 'package:flutter_inset_shadow/flutter_inset_shadow.dart';
 
+import '../../core/constants/theme_constants.dart';
+
 class BottomNavBar extends StatefulWidget {
   const BottomNavBar({
     super.key,
@@ -21,7 +23,7 @@ class _BottomNavBarState extends State<BottomNavBar> with AutomaticKeepAliveClie
   final List<IconData> icons = [
     CupertinoIcons.house_fill,
     CupertinoIcons.person_2_fill,
-    CupertinoIcons.add,
+    // CupertinoIcons.add,
     CupertinoIcons.graph_square,
     CupertinoIcons.person_fill,
   ];
@@ -29,9 +31,10 @@ class _BottomNavBarState extends State<BottomNavBar> with AutomaticKeepAliveClie
   @override
   Widget build(BuildContext context) {
     super.build(context);
-    bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
-    Color shadowColor = isDarkMode ? Colors.black54 : Color(0xFFF9FAFF);
-    Color lightShadow = isDarkMode ? Colors.black38 : Color(0xFFA6AABC);
+
+    final iconSlotWidth = (MediaQuery.of(context).size.width - 40) / icons.length;
+
+    final themeConstants = ThemeConstants(context);
 
     return SafeArea(
       child: Padding(
@@ -40,17 +43,17 @@ class _BottomNavBarState extends State<BottomNavBar> with AutomaticKeepAliveClie
           width: double.infinity,
           height: 70,
           decoration: BoxDecoration(
-            color: isDarkMode ? Theme.of(context).cardColor : const Color(0xFFE7EBF0),
+            color: themeConstants.isDarkMode ? Theme.of(context).cardColor : const Color(0xFFE7EBF0),
             borderRadius: BorderRadius.circular(50),
             boxShadow: [
               BoxShadow(
-                color: lightShadow,
+                color: themeConstants.lightShadow,
                 blurRadius: 5,
                 offset: Offset(2.5, 2.5),
                 inset: false,
               ),
               BoxShadow(
-                color: shadowColor,
+                color: themeConstants.shadowColor,
                 blurRadius: 5,
                 offset: Offset(-2.5, -2.5),
                 inset: false,
@@ -64,12 +67,14 @@ class _BottomNavBarState extends State<BottomNavBar> with AutomaticKeepAliveClie
                 children: [
                   AnimatedPositioned(
                     duration: const Duration(milliseconds: 300),
-                    left:
-                        (selectedIndex.value *
-                            ((MediaQuery.of(context).size.width - 40) / 5)) +
-                        15,
+                    left: (selectedIndex.value * iconSlotWidth) + ((iconSlotWidth - 50) / 2),
                     bottom: 10,
-                    child: iconContainer(true, lightShadow, shadowColor, isDarkMode),
+                    child: iconContainer(
+                      true,
+                      themeConstants.lightShadow,
+                      themeConstants.shadowColor,
+                      themeConstants.isDarkMode,
+                    ),
                   ),
                   Column(
                     children: [
@@ -89,14 +94,13 @@ class _BottomNavBarState extends State<BottomNavBar> with AutomaticKeepAliveClie
                               child: Icon(
                                 icons[index],
                                 size: 28,
-                                color:
-                                    selectedIndex.value == index
-                                        ? Theme.of(
-                                          context,
-                                        ).colorScheme.onPrimaryFixedVariant
-                                        : Theme.of(
-                                          context,
-                                        ).colorScheme.secondaryContainer,
+                                color: selectedIndex.value == index
+                                    ? Theme.of(
+                                        context,
+                                      ).colorScheme.onPrimaryFixedVariant
+                                    : Theme.of(
+                                        context,
+                                      ).colorScheme.secondaryContainer,
                               ),
                             ),
                           ),
@@ -125,23 +129,22 @@ class _BottomNavBarState extends State<BottomNavBar> with AutomaticKeepAliveClie
       decoration: BoxDecoration(
         color: isDarkMode ? Theme.of(context).cardColor : const Color(0xFFE7EBF0),
         borderRadius: BorderRadius.circular(50),
-        boxShadow:
-            inset
-                ? [
-                  BoxShadow(
-                    color: lightShadow,
-                    blurRadius: 5,
-                    offset: Offset(2.5, 2.5),
-                    inset: true,
-                  ),
-                  BoxShadow(
-                    color: shadowColor,
-                    blurRadius: 5,
-                    offset: Offset(-2.5, -2.5),
-                    inset: true,
-                  ),
-                ]
-                : [],
+        boxShadow: inset
+            ? [
+                BoxShadow(
+                  color: lightShadow,
+                  blurRadius: 5,
+                  offset: Offset(2.5, 2.5),
+                  inset: true,
+                ),
+                BoxShadow(
+                  color: shadowColor,
+                  blurRadius: 5,
+                  offset: Offset(-2.5, -2.5),
+                  inset: true,
+                ),
+              ]
+            : [],
       ),
     );
   }

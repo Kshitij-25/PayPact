@@ -1,7 +1,7 @@
-import '../entities/friend_entity.dart';
+import '../../data/model/friend_model.dart';
 
 abstract class FriendRepository {
-  Future<void> addFriend(String friendUserId);
-  Future<void> removeFriend(String friendUserId);
-  Stream<List<FriendEntity>> getFriends();
+  Stream<List<FriendModel>> searchUsersByEmail(String email);
+  Future<void> addFriend(String currentUserId, String friendUserId);
+  Stream<List<FriendModel>> getFriends(String userId);
 }

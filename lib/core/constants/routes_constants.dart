@@ -9,4 +9,6 @@ class Routes {
   static const activityScreen = '/activityScreen';
   static const profileScreen = '/profileScreen';
   static const expenseScreen = '/expenseScreen';
+  static const participantDetailsScreen = '/participantDetailsScreen';
+  static const groupSettingsScreen = '/groupSettingsScreen';
 }

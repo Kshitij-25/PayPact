@@ -40,6 +40,7 @@ extension ContextExtensions on BuildContext {
       this,
     ).showSnackBar(
       SnackBar(
+        behavior: SnackBarBehavior.floating,
         content: Text(message),
         duration: duration,
         action: action,

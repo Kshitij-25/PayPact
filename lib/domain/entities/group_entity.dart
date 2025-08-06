@@ -1,19 +1,23 @@
+enum GroupType { none, trip, home, couple, others }
+
 class GroupEntity {
-  final String groupId;
+  final String id;
   final String name;
-  final String? description;
+  final GroupType type;
   final String createdBy;
   final DateTime createdAt;
+  final DateTime? startDate;
+  final DateTime? endDate;
   final List<String> members;
-  final Map<String, String> memberNames; // userId -> name
 
   GroupEntity({
-    required this.groupId,
+    required this.id,
     required this.name,
-    this.description,
+    required this.type,
     required this.createdBy,
     required this.createdAt,
-    required this.members,
-    required this.memberNames,
+    this.startDate,
+    this.endDate,
+    this.members = const [],
   });
 }

@@ -1,23 +1,29 @@
+enum ExpenseSplitType { equally, exact, percentage, shares, adjustment }
+
 class ExpenseEntity {
-  final String expenseId;
-  final String groupId;
-  final String paidBy;
-  final double amount;
+  final String id;
   final String description;
-  final String category;
+  final double amount;
+  final String paidBy;
   final DateTime date;
-  final Map<String, double> shares; // userId -> amount owed
-  final String splitType; // "EQUAL", "PERCENTAGE", "EXACT"
+  final ExpenseSplitType splitType;
+  final Map<String, double> splits; // userId -> amount/percentage/share
+  final String? note;
+  final String? base64Image;
+  final String? groupId; // null for friend expenses
+  final List<String> involvedUsers;
 
   ExpenseEntity({
-    required this.expenseId,
-    required this.groupId,
-    required this.paidBy,
-    required this.amount,
+    required this.id,
     required this.description,
-    required this.category,
+    required this.amount,
+    required this.paidBy,
     required this.date,
-    required this.shares,
     required this.splitType,
+    required this.splits,
+    required this.involvedUsers,
+    this.note,
+    this.base64Image,
+    this.groupId,
   });
 }

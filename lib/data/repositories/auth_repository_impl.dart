@@ -1,21 +1,15 @@
 import '../../domain/repositories/auth_repository.dart';
-import '../../domain/entities/user_entity.dart';
-import '../datasources/auth_remote_data_source.dart';
+import '../datasources/auth_datasource.dart';
+import '../model/user_model.dart';
 
 class AuthRepositoryImpl implements AuthRepository {
-  final AuthRemoteDataSource _remoteDataSource;
+  final AuthRemoteDataSource remoteDataSource;
 
-  AuthRepositoryImpl(this._remoteDataSource);
-
-  @override
-  Stream<UserEntity> get authStateChanges => _remoteDataSource.authStateChanges;
+  AuthRepositoryImpl(this.remoteDataSource);
 
   @override
-  UserEntity get currentUser => _remoteDataSource.currentUser;
+  Future<UserModel> signInWithGoogle() => remoteDataSource.signInWithGoogle();
 
   @override
-  Future<UserEntity> signInWithGoogle() => _remoteDataSource.signInWithGoogle();
-
-  @override
-  Future<void> signOut() => _remoteDataSource.signOut();
+  Future<void> signOut() => remoteDataSource.signOut();
 }

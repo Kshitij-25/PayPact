@@ -3,12 +3,12 @@ import 'dart:io';
 import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:paypact/app.dart';
-import 'package:paypact/core/constants/network_helper.dart';
-import 'package:paypact/core/routes/app_router.dart';
 import 'package:shared_preferences/shared_preferences.dart' show SharedPreferences;
 
+import 'app.dart';
+import 'core/routes/app_router.dart';
 import 'core/services/firebase_service.dart';
+import 'injection_container.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -17,9 +17,11 @@ void main() async {
 
   await FirebaseService().initialize();
 
+  await init();
+
   await AppRouter.setupRoutes();
 
-  NetworkHelper.initialize();
+  // NetworkHelper.initialize();
 
   if (kDebugMode) {
     HttpOverrides.global = CustomHttpOverrides();

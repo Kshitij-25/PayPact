@@ -1,8 +1,10 @@
-import '../entities/expense_entity.dart';
+import '../../data/model/expense_model.dart';
 
 abstract class ExpenseRepository {
-  Future<String> addExpense(ExpenseEntity expense);
-  Future<void> settleUp(String groupId, String fromUserId, String toUserId, double amount);
-  Stream<List<ExpenseEntity>> getGroupExpenses(String groupId);
-  Stream<List<ExpenseEntity>> getUserExpenses();
+  Stream<List<ExpenseModel>> getExpensesForUser(String userId);
+  Stream<List<ExpenseModel>> getExpensesForGroup(String groupId);
+  Future<String> createExpense(ExpenseModel expense);
+  Future<void> updateExpense(ExpenseModel expense);
+  Future<void> deleteExpense(String expenseId);
+  Stream<ExpenseModel> getExpense(String expenseId);
 }

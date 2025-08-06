@@ -1,9 +1,13 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart' hide BoxDecoration, BoxShadow;
-import 'package:flutter_inset_shadow/flutter_inset_shadow.dart';
+import 'package:paypact/core/extensions/context_extensions.dart';
 
-import '../../core/constants/firebase_helper.dart';
-import 'custom_avatar_widget.dart';
+import '../../core/constants/firebase_constants.dart';
+import '../../data/model/friend_model.dart';
+import '../../domain/repositories/friend_repository.dart';
+import '../../injection_container.dart';
+import 'custom_container.dart';
 
 class FriendsSearchDelegate extends SearchDelegate<String> {
   @override
@@ -38,7 +42,7 @@ class FriendsSearchDelegate extends SearchDelegate<String> {
   List<Widget>? buildActions(BuildContext context) {
     return [
       IconButton(
-        icon: Icon(Icons.clear),
+        icon: Icon(CupertinoIcons.clear),
         onPressed: () {
           query = '';
         },
@@ -49,7 +53,7 @@ class FriendsSearchDelegate extends SearchDelegate<String> {
   @override
   Widget? buildLeading(BuildContext context) {
     return IconButton(
-      icon: Icon(Icons.arrow_back),
+      icon: Icon(CupertinoIcons.back),
       onPressed: () {
         close(context, '');
       },
@@ -61,27 +65,6 @@ class FriendsSearchDelegate extends SearchDelegate<String> {
   @override
   Widget buildSuggestions(BuildContext context) => _buildUserList(context);
 
-  Future<void> _addFriend(String userId) async {
-    final currentUser = FirebaseHelper.currentUser;
-    if (currentUser == null || currentUser.uid == userId) return;
-
-    final batch = FirebaseFirestore.instance.batch();
-    final userRef = FirebaseFirestore.instance.collection('users').doc(currentUser.uid);
-    final friendRef = FirebaseFirestore.instance.collection('users').doc(userId);
-
-    batch.update(userRef, {
-      'friends': FieldValue.arrayUnion([userId]),
-      'updatedAt': FieldValue.serverTimestamp(),
-    });
-
-    batch.update(friendRef, {
-      'friends': FieldValue.arrayUnion([currentUser.uid]),
-      'updatedAt': FieldValue.serverTimestamp(),
-    });
-
-    await batch.commit();
-  }
-
   Widget _buildUserList(BuildContext context) {
     if (query.isEmpty) {
       return Center(child: Text('Start typing to search'));
@@ -92,13 +75,11 @@ class FriendsSearchDelegate extends SearchDelegate<String> {
       return SizedBox.shrink();
     }
 
-    return StreamBuilder<QuerySnapshot>(
-      stream: FirebaseFirestore.instance
-          .collection('users')
-          .where('email', isEqualTo: query) // Exact match first
-          .snapshots(),
+    final friendRepository = getIt<FriendRepository>();
+
+    return StreamBuilder<List<FriendModel>>(
+      stream: friendRepository.searchUsersByEmail(query),
       builder: (context, snapshot) {
-        // Handle loading state
         if (snapshot.connectionState == ConnectionState.waiting) {
           return Center(child: CircularProgressIndicator());
         }
@@ -109,98 +90,90 @@ class FriendsSearchDelegate extends SearchDelegate<String> {
         }
 
         // Handle empty state
-        if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+        if (!snapshot.hasData || snapshot.data!.isEmpty) {
           // Fall back to contains search if exact match fails
           return _buildFallbackSearch(context);
         }
 
-        // Process results
-        final users = snapshot.data!.docs.where((doc) {
-          final email = doc['email'] as String?;
-          final currentUser = FirebaseHelper.currentUser;
-          return email != null &&
-              email.isNotEmpty &&
-              (currentUser == null || email != currentUser.email);
-        }).toList();
+        final results = snapshot.data!;
 
-        if (users.isEmpty) {
-          return Center(child: Text('No users found'));
+        if (results.isEmpty) {
+          return const Center(child: Text('No users found'));
         }
 
-        return _buildUserListView(context, users);
+        return _buildUserListView(context, results);
       },
     );
   }
 
   Widget _buildFallbackSearch(BuildContext context) {
-    return StreamBuilder<QuerySnapshot>(
-      stream: FirebaseFirestore.instance
-          .collection('users')
-          .orderBy('email')
-          .startAt([query])
-          .endAt(['$query\uf8ff'])
-          .limit(10)
-          .snapshots(),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return Center(child: CircularProgressIndicator());
-        }
-
-        if (snapshot.hasError) {
-          return Center(child: Text('Error loading users'));
-        }
-
-        if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-          return Center(child: Text('No users found'));
-        }
-
-        final users = snapshot.data!.docs.where((doc) {
-          final email = doc['email'] as String?;
-          final currentUser = FirebaseHelper.currentUser;
-          return email != null &&
-              email.isNotEmpty &&
-              (currentUser == null || email != currentUser.email);
-        }).toList();
-
-        return _buildUserListView(context, users);
-      },
+    return Center(
+      child: Text('No exact match found. Searching for similar emails...'),
     );
   }
 
-  Widget _buildUserListView(BuildContext context, List<QueryDocumentSnapshot> users) {
+  Widget _buildUserListView(BuildContext context, List<FriendModel> users) {
+    final friendRepository = getIt<FriendRepository>();
     return ListView.builder(
       padding: const EdgeInsets.all(16),
       itemCount: users.length,
       itemBuilder: (context, index) {
         final user = users[index];
-        final userId = user.id;
-        final email = user.get('email') as String;
-        final name = user.get('name') as String? ?? email.split('@').first;
-        final photoURL = user.get('photoUrl') as String?;
-
-        return Card(
-          margin: const EdgeInsets.only(bottom: 8),
-          child: ListTile(
-            leading: CircleAvatar(
-              backgroundImage: photoURL != null ? NetworkImage(photoURL) : null,
-              child: photoURL == null ? Text(name[0].toUpperCase()) : null,
-            ),
-            title: Text(name),
-            subtitle: Text(email),
-            onTap: () async {
-              try {
-                await _addFriend(userId);
-                if (context.mounted) {
-                  close(context, userId);
-                }
-              } catch (e) {
-                if (context.mounted) {
-                  ScaffoldMessenger.of(
-                    context,
-                  ).showSnackBar(SnackBar(content: Text('Failed to add friend: $e')));
-                }
+        final userId = user.userId;
+        final email = user.email;
+        final name = user.name ?? email.split('@').first;
+        final photoURL = user.photoUrl;
+        return GestureDetector(
+          onTap: () async {
+            try {
+              friendRepository.addFriend(FirebaseConstants.currentUserId!, user.userId);
+              if (context.mounted) {
+                close(context, userId);
               }
-            },
+              context.showSnackBar(
+                '$name added as friend',
+                duration: Duration(seconds: 3),
+              );
+            } catch (e) {
+              if (context.mounted) {
+                context.showSnackBar(
+                  'Failed to add friend: $e',
+                  duration: Duration(seconds: 3),
+                );
+              }
+            }
+          },
+          child: CustomContainer(
+            padding: EdgeInsets.symmetric(horizontal: 15, vertical: 20),
+            child: Row(
+              children: [
+                CircleAvatar(
+                  backgroundImage: photoURL != null
+                      ? CachedNetworkImageProvider(
+                          photoURL,
+                          cacheKey: userId,
+                        )
+                      : null,
+                  child: photoURL == null ? Text(name[0].toUpperCase()) : null,
+                ),
+                SizedBox(width: 15),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      name,
+                      style: Theme.of(context).textTheme.titleMedium,
+                    ),
+                    Text(
+                      email,
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: Colors.grey,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
         );
       },

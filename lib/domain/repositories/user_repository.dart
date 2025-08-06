@@ -1,9 +1,5 @@
-import '../entities/user_entity.dart';
+import '../../data/model/user_model.dart';
 
 abstract class UserRepository {
-  UserEntity? get currentUser; // Add this line
-
-  Future<UserEntity?> getUser(String userId);
-  Future<UserEntity?> findUserByEmail(String email);
-  Stream<UserEntity> getUserStream(String userId);
+  Future<UserModel> getUser(String userId);
 }
