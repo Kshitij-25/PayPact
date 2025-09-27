@@ -27,7 +27,7 @@ Future<void> init() async {
   await Firebase.initializeApp();
   getIt.registerLazySingleton(() => FirebaseAuth.instance);
   getIt.registerLazySingleton(() => FirebaseFirestore.instance);
-  getIt.registerLazySingleton(() => GoogleSignIn());
+  getIt.registerLazySingleton(() => GoogleSignIn.instance);
 
   // Data sources
   getIt.registerLazySingleton<AuthRemoteDataSource>(() => AuthRemoteDataSourceImpl(getIt(), getIt()));

@@ -20,12 +20,11 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
 
   @override
   Future<UserModel> signInWithGoogle() async {
-    final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
-    if (googleUser == null) throw Exception('Google Sign In cancelled');
+    final GoogleSignInAccount googleUser = await GoogleSignIn.instance.authenticate();
 
-    final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+    final GoogleSignInAuthentication googleAuth = googleUser.authentication;
     final credential = GoogleAuthProvider.credential(
-      accessToken: googleAuth.accessToken,
+      accessToken: googleAuth.idToken,
       idToken: googleAuth.idToken,
     );
 
@@ -57,6 +56,6 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   @override
   Future<void> signOut() async {
     await _auth.signOut();
-    await GoogleSignIn().signOut();
+    await GoogleSignIn.instance.signOut();
   }
 }

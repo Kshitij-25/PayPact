@@ -1,21 +1,17 @@
 import 'package:flutter/material.dart' hide BoxShadow, BoxDecoration;
 import 'package:flutter_inset_shadow/flutter_inset_shadow.dart';
+import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:lottie/lottie.dart';
 
 import '../../../core/constants/network_helper.dart';
+import '../../../core/constants/theme_constants.dart';
 
 class NoInternetScreen extends ConsumerWidget {
-  // Changed to ConsumerWidget
   const NoInternetScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // Added WidgetRef
-    bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
-    Color shadowColor = isDarkMode ? Colors.black54 : Colors.white;
-    Color lightShadow = isDarkMode ? Colors.black38 : Colors.grey.shade400;
-
     return Scaffold(
       body: Center(
         child: Padding(
@@ -35,24 +31,23 @@ class NoInternetScreen extends ConsumerWidget {
               GestureDetector(
                 onTap: () async {
                   if (await NetworkHelper.hasInternet()) {
-                    // Use Navigator instead of GoRouter for basic pop
-                    Navigator.of(context).pop();
+                    context.pop();
                   }
                 },
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
                   decoration: BoxDecoration(
-                    color: isDarkMode ? Theme.of(context).cardColor : const Color(0xFFE7EBF0),
+                    color: ThemeConstants(context).isDarkMode ? Theme.of(context).cardColor : const Color(0xFFE7EBF0),
                     borderRadius: BorderRadius.circular(10),
                     boxShadow: [
                       BoxShadow(
-                        color: lightShadow,
+                        color: ThemeConstants(context).lightShadow,
                         offset: const Offset(2.5, 2.5),
                         blurRadius: 5,
                         inset: false,
                       ),
                       BoxShadow(
-                        color: shadowColor,
+                        color: ThemeConstants(context).shadowColor,
                         offset: const Offset(-2.5, -2.5),
                         blurRadius: 5,
                         inset: false,

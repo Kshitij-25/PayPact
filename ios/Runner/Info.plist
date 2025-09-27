@@ -62,5 +62,9 @@
     <array>
         <string>NSUserActivityTypeBrowsingWeb</string>
     </array>
+	<key>GIDClientID</key>
+	<!-- TODO Replace this value: -->
+	<!-- Copied from GoogleService-Info.plist key CLIENT_ID -->
+	<string>531387933797-6r3upag01ihg89jokos6601s5mlkcg6u.apps.googleusercontent.com</string>
 </dict>
 </plist>

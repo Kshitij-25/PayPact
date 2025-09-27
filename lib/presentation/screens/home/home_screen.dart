@@ -15,7 +15,9 @@ class HomeScreen extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final friendsState = ref.watch(friendNotifierProvider(FirebaseConstants.currentUserId!));
+    final friendsState = ref.watch(
+      friendNotifierProvider(FirebaseConstants.currentUserId!),
+    );
 
     return Scaffold(
       appBar: AppBar(
@@ -32,8 +34,12 @@ class HomeScreen extends HookConsumerWidget {
         padding: const EdgeInsets.symmetric(horizontal: 10),
         child: friendsState.when(
           data: (friends) => friends.isEmpty ? _buildEmptyState(context) : _buildFriendList(context, friends),
-          loading: () => const Center(child: CircularProgressIndicator()),
-          error: (error, _) => Center(child: Text('Error: $error')),
+          loading: () => const Center(
+            child: CircularProgressIndicator(),
+          ),
+          error: (error, _) => Center(
+            child: Text('Error: $error'),
+          ),
         ),
       ),
     );

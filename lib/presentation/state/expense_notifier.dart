@@ -1,4 +1,5 @@
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:hooks_riverpod/legacy.dart';
 
 import '../../data/model/expense_model.dart';
 import '../../domain/entities/expense_entity.dart';

@@ -1,5 +1,6 @@
 // lib/features/auth/presentation/notifiers/auth_notifier.dart
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:hooks_riverpod/legacy.dart';
 
 import '../../data/model/user_model.dart';
 import '../../domain/repositories/auth_repository.dart';
